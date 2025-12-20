@@ -1,24 +1,20 @@
 mod terminal;
-use std::io::{self, Write};
 use terminal::Terminal;
 use crossterm::event::{read, Event, Event::Key, KeyCode::Char, KeyEvent, KeyModifiers};
 
 pub struct Editor {
     should_quit: bool,
-    stdout: std::io::Stdout,
 }
 
 impl Editor {
     pub const fn default() -> Self {
         Self { 
             should_quit: false,
-            stdout: io::stdout(),
         }
     }
     pub fn run(&mut self) {
-        Terminal::initialize(&self.stdout).unwrap();
+        Terminal::initialize().unwrap();
         let result = self.repl();
-        Terminal::terminate(&self.stdout).unwrap();
         result.unwrap();
     }
     fn repl(&mut self) -> Result<(), std::io::Error> {
@@ -34,11 +30,11 @@ impl Editor {
     }
     fn refresh_screen(&self) -> Result<(), std::io::Error> { 
         if self.should_quit {
-            Terminal::clear_screen(&self.stdout)?;
+            Terminal::clear_screen()?;
             print!("Goodbye.\r\n");
         } else {
-            Terminal::draw_rows(&self.stdout)?;
-            Terminal::cursor_home(&self.stdout)?;
+            Terminal::draw_rows()?;
+            Terminal::cursor_home()?;
         }
         Ok(())
     }
