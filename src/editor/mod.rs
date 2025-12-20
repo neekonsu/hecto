@@ -4,6 +4,7 @@ use crossterm::event::{read, Event, Event::Key, KeyCode::Char, KeyEvent, KeyModi
 
 pub struct Editor {
     should_quit: bool,
+    
 }
 
 impl Editor {
@@ -15,6 +16,7 @@ impl Editor {
     pub fn run(&mut self) {
         Terminal::initialize().unwrap();
         let result = self.repl();
+        Terminal::terminate().unwrap();
         result.unwrap();
     }
     fn repl(&mut self) -> Result<(), std::io::Error> {
@@ -28,7 +30,7 @@ impl Editor {
         }
         Ok(())
     }
-    fn refresh_screen(&self) -> Result<(), std::io::Error> { 
+    fn refresh_screen(&mut self) -> Result<(), std::io::Error> { 
         if self.should_quit {
             Terminal::clear_screen()?;
             print!("Goodbye.\r\n");
