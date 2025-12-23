@@ -4,42 +4,66 @@ use crossterm::cursor::{Hide, Show, MoveTo};
 use crossterm::terminal::{Clear, ClearType, enable_raw_mode, disable_raw_mode, size};
 use crossterm::style::Print;
 
-pub struct Terminal {
-    x: u16,
-    y: u16
+#[derive(Copy, Paste)]
+pub struct Position {
+    pub x: u16,
+    pub y: u16,
 }
+
+
+#[derive(Copy, Paste)]
+pub struct Size {
+    pub width: u16,
+    pub height: u16,
+}
+
+
+pub struct Terminal;
 
 impl Terminal {
     // Enter raw mode, clear screen, move cursor 0,0
-    pub fn initialize() -> Result<(), std::io::Error> {
+    pub fn initialize() -> Result<(), Error> {
         enable_raw_mode()?;
         Self::clear_screen()?;
-        Self::cursor_home()?;
+        Self::move_cursor(Position{x:0,y:0})?;
+        Self::execute()?;
         Ok(())
     }
-    // Clear screen
-    pub fn clear_screen() -> Result<(), std::io::Error> {
-        execute!(stdout(), Clear(ClearType::All))?;
-        Ok(())
-    }
-    // Draw tildes, consider renaming
-    pub fn draw_rows() -> Result<(), std::io::Error> {
-        let rows = size()?.1;
-        queue!(stdout(), Clear(ClearType::All), Hide)?;
-        for r in 0..rows {
-            queue!(stdout(), MoveTo(0,r), Print("~".to_string()))?;
-        }
+    pub fn show() -> Result<(), Error> {
         queue!(stdout(), Show)?;
+        Ok(())
+    }
+    pub fn hide() -> Result<(), Error> {
+        queue!(stdout(), Hide)?;
+        Ok(())
+    }
+    pub fn clear_line() -> Result<(), Error> {
+        queue!(stdout(), Clear(ClearType::CurrentLine))?;
+        Ok(())
+    }
+    pub fn clear_screen() -> Result<(), Error> {
+        queue!(stdout(), Clear(ClearType::All))?;
+        Ok(())
+    }
+    pub fn size() -> Result<Size, Error> {
+        let (w, h) = size()?;
+        Ok(Size{width:w, height:h})
+    }
+    pub fn move_cursor(pos: Position) -> Result<(), Error> {
+        queue!(stdout(), MoveTo(pos.x, pos.y))?;
+        Ok(())
+    }
+    pub fn print(string: &str) -> Result<(), Error> {
+        queue!(stdout(), Print(string))?;
+        Ok(())
+    }
+    pub fn execute() -> Result<(), Error> {
         stdout().flush()?;
         Ok(())
     }
-    // Move cursor 0,0
-    pub fn cursor_home() -> Result<(), std::io::Error> {
-        execute!(stdout(), MoveTo(0,0))?;
-        Ok(())
-    }
     // Exit Raw Mode
-    pub fn terminate() -> Result<(), std::io::Error> {
+    pub fn terminate() -> Result<(), Error> {
+        Self::execute()?;
         disable_raw_mode()?;
         Ok(())
     }
