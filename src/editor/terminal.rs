@@ -1,17 +1,17 @@
-use std::io::{stdout, Write};
-use crossterm::{execute, queue};
+use std::io::{stdout, Write, Error};
+use crossterm::queue;
 use crossterm::cursor::{Hide, Show, MoveTo}; 
 use crossterm::terminal::{Clear, ClearType, enable_raw_mode, disable_raw_mode, size};
 use crossterm::style::Print;
 
-#[derive(Copy, Paste)]
+#[derive(Copy, Clone)]
 pub struct Position {
     pub x: u16,
     pub y: u16,
 }
 
 
-#[derive(Copy, Paste)]
+#[derive(Copy, Clone)]
 pub struct Size {
     pub width: u16,
     pub height: u16,
